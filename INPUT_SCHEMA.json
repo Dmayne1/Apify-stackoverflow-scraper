@@ -1,20 +1,22 @@
 {
-  "title": "Stackoverflow Scraper",
+  "title": "Scraper Input",
   "type": "object",
+  "schemaVersion": 1,
   "properties": {
-    "proxyConfiguration": {
-      "title": "Proxy configuration",
-      "type": "object",
-      "default": {
-        "useApifyProxy": true
-      }
-    },
     "startUrls": {
       "title": "Start URLs",
       "type": "array",
-      "items": {
-        "type": "string"
-      }
+      "description": "URLs to scrape",
+      "editor": "requestListSources",
+      "default": [{"url": "https://example.com"}]
+    },
+    "maxItems": {
+      "title": "Max items",
+      "type": "integer",
+      "description": "Maximum number of items to scrape",
+      "default": 10,
+      "minimum": 1
     }
-  }
+  },
+  "required": ["startUrls"]
 }
