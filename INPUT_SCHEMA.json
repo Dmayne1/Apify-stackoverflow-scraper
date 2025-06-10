@@ -1,0 +1,20 @@
+{
+  "title": "Stackoverflow Scraper",
+  "type": "object",
+  "properties": {
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "type": "object",
+      "default": {
+        "useApifyProxy": true
+      }
+    },
+    "startUrls": {
+      "title": "Start URLs",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
