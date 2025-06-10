@@ -1,29 +1,42 @@
-const Apify = require('apify');
+const { Actor } = require('apify');
 const { PuppeteerCrawler } = require('crawlee');
 
-Apify.main(async () => {
-    const input = await Apify.getInput();
-    const { startUrls = [], maxPages = 10, proxyConfiguration } = input;
-
-    console.log('Starting Stackoverflow scraper...');
-    const proxyConfig = await Apify.createProxyConfiguration(proxyConfiguration);
+Actor.main(async () => {
+    console.log('Starting scraper...');
+    
+    const input = await Actor.getInput() || {};
+    const { startUrls = [], maxItems = 10 } = input;
+    
+    if (!startUrls.length) {
+        console.log('No URLs provided, using default');
+        await Actor.pushData([{
+            message: 'No URLs provided in input',
+            timestamp: new Date().toISOString(),
+            status: 'completed'
+        }]);
+        return;
+    }
     
     const crawler = new PuppeteerCrawler({
-        proxyConfiguration: proxyConfig,
+        maxRequestsPerCrawl: maxItems,
         requestHandler: async ({ page, request }) => {
-            await page.waitForTimeout(3000);
+            console.log(`Processing: ${request.url}`);
             
-            const data = await page.evaluate(() => ({
-                url: window.location.href,
-                title: document.title,
-                content: document.body.innerText.substring(0, 1000),
-                scraped_at: new Date().toISOString()
-            }));
+            const title = await page.title();
             
-            await Apify.pushData(data);
+            await Actor.pushData({
+                url: request.url,
+                title: title,
+                timestamp: new Date().toISOString()
+            });
+        },
+        failedRequestHandler: async ({ request }) => {
+            console.log(`Request failed: ${request.url}`);
         }
     });
 
     await crawler.addRequests(startUrls.map(url => ({ url })));
     await crawler.run();
+    
+    console.log('Scraper completed!');
 });
